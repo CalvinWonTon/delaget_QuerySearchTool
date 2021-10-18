@@ -1,56 +1,121 @@
 import React from 'react';
-import { Dropdown, Input } from 'semantic-ui-react';
+import './App.css';
+import 'semantic-ui-css/semantic.min.css';
+import 'react-dates/initialize';
+import 'react-dates/lib/css/_datepicker.css';
+import { DateRangePicker } from 'react-dates';
+import { Container, Dropdown, Form, Grid, Segment, Select, Button, Divider } from 'semantic-ui-react';
+import { useState } from 'react';
+import { restaurantOptions, transactionTimeOptions, compareType, filterOptions } from './Utility'
+import { tsConstructorType } from '@babel/types';
+
+const initialFormData = {
+  restuarantIds: [],
+  /*fromDate: undefined,
+  toDate: undefined,
+  focusedInput: undefined,*/
+  fromHour: 6,
+  toHour: 29,
+  metricCriteria: [{
+    metricCode: undefined,
+    compareType: undefined,
+    value: undefined,
+    operatorType: 'And',
+  }]
+};
 
 function App() {
-  const restaurantOptions = [
-    { key: 'ph', value: 'ph', text: 'Pizza Hut' },
-    { key: 'tb', value: 'tb', text: 'Taco Bell' },
-    { key: 'md', value: 'md', text: 'McDonalds' },
-  ]
-
-  const filterOptions = [
-    { key: 'tta', value: 'tta', text: 'TransactionTotalAmount' },
-    { key: 'tna', value: 'tna', text: 'TransactionNetAmount' },
-    { key: 'isq', value: 'isq', text: 'ItemSoldQty' },
-    { key: 'bq', value: 'bq', text: 'BeverageQty' },
-    { key: 'da', value: 'da', text: 'DiscountAmount' },
-    { key: 'ida', value: 'ida', text: 'ItemDeletedAmount' },
-    { key: 'dr', value: 'dr', text: 'DiscountRatio' },
-    { key: 'ra', value: 'ra', text: 'RefundAmount' },
-  ]
-
-  const measureOptions = [
-    { key: '1', value: '1', text: '<=' },
-    { key: '2', value: '2', text: '<' },
-    { key: '3', value: '3', text: '=' },
-    { key: '4', value: '4', text: '>' },
-    { key: '4', value: '5', text: '>=' },
-  ]
+  const [ restaurantIds, setRestaurantIds ]= useState([]);
+  const [ fromHour, setFromHour ] = useState([6]);
+  const [ toHour, setToHour ] = useState([29]);
+  const [ fromDate, toDate, focusedInput] = useState([undefined]);
 
   return (
     <div className="App">
-      <h4>Restaurants</h4>
-      <Dropdown 
-        selection
-        placeholder='Select Restaurant'
-        search
-        clearable options={restaurantOptions}
-      />
+      <Grid>
+        <Grid.Row>
+          <Container>
+            <Segment className='Segment'>
+              <Grid centered>
+                <Grid.Row columns='1'>
+                  <Grid.Column textAlign='center'>
+                    <h3>Custom Search Query Tool</h3>
+                  </Grid.Column>
+                </Grid.Row>
+                <Grid.Row columns='1'>
+                  <Grid.Column>
+                    <Form /*onSubmit={() => onSubmit()}*/>
+                      <Form.Field>
+                        <label>Restuarant ID</label>
+                        <Dropdown 
+                          selection 
+                          multiple 
+                          placeholder='Select Restaurant ID'
+                          options={restaurantOptions}
+                          value={restaurantIds}
+                          onChange={(event, data)=> setRestaurantIds(data.value)}
+                        />
+                      </Form.Field>
 
-      <h4>Dates</h4>
-      <Dropdown
-        selection 
-        placeholder='MM/DD/YYYY'
-        clearable
-      />
+                      <Form.Group> 
+                        <Form.Field>
+                          <label>Date Range</label>
+                          <DateRangePicker
+                            /*startDate={this.state.startDate}
+                            startDateId='startDate'
+                            endDate={this.state.endDate}
+                            endDateId='endDate'
+                            onDatesChange={({startDate, endDate}) => {this.setState({startDate, endDate})}}
+                            focusedInput={this.state.focusedInput}
+                            onFocusChange={(focusedInput) => {this.setState({focusedInput})}}*/
+                          />
+                        </Form.Field>                      
+                      </Form.Group>
 
-      <h4>Transaction Times</h4>
-      <p><Input placeholder='HH:MM'/>to<Input placeholder='HH:MM'/></p>
+                      <Form.Group>
+                        <Form.Field
+                        control={Select}
+                        label={'Transaction Time Start'}
+                        options={transactionTimeOptions}
+                        value={fromHour}
+                        placeholder='Start'
+                        onChange={(event, data) => setFromHour(data.value)}
+                        />
+                        <Form.Field
+                        control={Select}
+                        label={'Transaction Time Start'}
+                        options={transactionTimeOptions}
+                        placeholder='End'
+                        value={toHour}
+                        onChange={(event, data) => setToHour(data.value)}
+                        />
+                      </Form.Group>
 
-      <h4>Metrics</h4>
-      <p><Dropdown placeholder='Filter' selection clearable options={filterOptions}/>
-      <Dropdown placeholder='Measure' selection clearable options={measureOptions}/>
-      <Input placeholder='Amount'/></p>
+                      <Form.Group>
+                        <Form.Field>
+                          <Button /*onClick={() => addCriteria()}*/ color='blue'>Add Criteria</Button>
+                        </Form.Field>
+                      </Form.Group>
+                      <Form.Field>
+                        <Button color='olive' type='submit'>Submit</Button>
+                      </Form.Field>
+
+                    </Form>
+                  </Grid.Column>
+                </Grid.Row>
+              </Grid>
+            </Segment>
+          </Container>
+        </Grid.Row>
+        <Divider hidden></Divider>
+        <Grid.Row>
+          <Container>
+            <Segment>
+              <h3>Results</h3>
+            </Segment>
+          </Container>
+        </Grid.Row>
+      </Grid>
     </div>
   );
 }
