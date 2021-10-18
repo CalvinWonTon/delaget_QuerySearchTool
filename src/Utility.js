@@ -49,7 +49,7 @@ export const restaurantOptions = [
     value: '10',
     text: 'Restuarant 10' 
   },
-]
+];
 
 export const filterOptions = [
   { 
@@ -92,7 +92,7 @@ export const filterOptions = [
     value: 'RefundAmount', 
     text: 'Refund Amount $' 
   },
-]
+];
 
 export const compareType = [
   { 
@@ -120,7 +120,7 @@ export const compareType = [
     text: '>=', 
     value: 'GreaterThanOrEqual',
   },
-]
+];
 
 export const transactionTimeOptions = [
   {
@@ -242,5 +242,18 @@ export const transactionTimeOptions = [
     key: 24,
     text: "5 am (next day)",
     value: 29
+  }
+];
+
+export const operatorTypeOptions = [
+  {
+    key: 1,
+    text: 'And',
+    value: 'And'
+  },
+  {
+    key: 2,
+    text: 'Or',
+    value: 'Or'
   }
 ]
