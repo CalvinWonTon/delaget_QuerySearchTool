@@ -4,7 +4,7 @@ import 'semantic-ui-css/semantic.min.css';
 import 'react-dates/initialize';
 import 'react-dates/lib/css/_datepicker.css';
 import { DateRangePicker } from 'react-dates';
-import { Container, Dropdown, Form, Grid, Segment, Select, Button, Divider } from 'semantic-ui-react';
+import { Container, Dropdown, Form, Grid, Segment, Select, Button, Divider, Input } from 'semantic-ui-react';
 import { useState } from 'react';
 import { restaurantOptions, transactionTimeOptions, compareType, filterOptions } from './Utility'
 import { tsConstructorType } from '@babel/types';
@@ -74,20 +74,41 @@ function App() {
 
                       <Form.Group>
                         <Form.Field
-                        control={Select}
-                        label={'Transaction Time Start'}
-                        options={transactionTimeOptions}
-                        value={fromHour}
-                        placeholder='Start'
-                        onChange={(event, data) => setFromHour(data.value)}
+                          control={Select}
+                          label={'Transaction Time Start'}
+                          options={transactionTimeOptions}
+                          value={fromHour}
+                          placeholder='Start'
+                          onChange={(event, data) => setFromHour(data.value)}
                         />
                         <Form.Field
-                        control={Select}
-                        label={'Transaction Time Start'}
-                        options={transactionTimeOptions}
-                        placeholder='End'
-                        value={toHour}
-                        onChange={(event, data) => setToHour(data.value)}
+                          control={Select}
+                          label={'Transaction Time Start'}
+                          options={transactionTimeOptions}
+                          placeholder='End'
+                          value={toHour}
+                          onChange={(event, data) => setToHour(data.value)}
+                        />
+                      </Form.Group>
+
+                      <Form.Group>
+                        <Form.Field
+                          control={Select}
+                          label='Filter'
+                          options={filterOptions}
+                          placeholder='Select Filter'
+                        />
+                        <Form.Field
+                          control={Select}
+                          options={compareType}
+                          label='Metric'
+                          placeholder='Select Metric'
+                        />
+                        <Form.Field
+                          control={Input}
+                          label='Value'
+                          placeholder='e.g. 12345'
+                          
                         />
                       </Form.Group>
 
