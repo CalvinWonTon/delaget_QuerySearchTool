@@ -116,7 +116,7 @@ export const compareType = [
     value: 'GreaterThan'
   },
   { 
-    key: '4',
+    key: '5',
     text: '>=', 
     value: 'GreaterThanOrEqual',
   },
