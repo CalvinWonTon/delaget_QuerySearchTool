@@ -1,34 +1,59 @@
 import React from 'react';
 import './App.css';
 import 'semantic-ui-css/semantic.min.css';
-import 'react-dates/initialize';
-import 'react-dates/lib/css/_datepicker.css';
-import { DateRangePicker } from 'react-dates';
+import 'react-datez/dist/css/react-datez.css';
+import { ReactDatez } from 'react-datez'
 import { Container, Dropdown, Form, Grid, Segment, Select, Button, Divider, Input } from 'semantic-ui-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { restaurantOptions, transactionTimeOptions, compareType, filterOptions } from './Utility'
-import { tsConstructorType } from '@babel/types';
 
 const initialFormData = {
   restuarantIds: [],
-  /*fromDate: undefined,
-  toDate: undefined,
-  focusedInput: undefined,*/
+  fromDate: "",
+  toDate: '',
   fromHour: 6,
   toHour: 29,
   metricCriteria: [{
-    metricCode: undefined,
-    compareType: undefined,
-    value: undefined,
+    metricCode: "",
+    compareType: "",
+    value: "",
     operatorType: 'And',
   }]
 };
 
 function App() {
   const [ restaurantIds, setRestaurantIds ]= useState([]);
+  const [ fromDate, setDateInput ] = useState("");
+  const [ toDate, setToDateInput ] = useState("");
   const [ fromHour, setFromHour ] = useState([6]);
   const [ toHour, setToHour ] = useState([29]);
-  const [ fromDate, toDate, focusedInput] = useState([undefined]);
+
+  const userPull = async () => {
+    const response = await fetch('https://customsearchqueryapi.azurewebsites.net/SEARCH/MetricDefinitions');
+    const myJson = await response.json(); //extract JSON from the http response
+    console.log(myJson);
+  }
+
+  useEffect(() => {
+    userPull();
+    console.log("Information");
+
+  }, []);
+
+  const request = {"restaurantIds":[1],"fromDate":"2020-09-22T00:00:00","toDate":"2020-09-22T00:00:00","fromHour":6,"toHour":29,"metricCriteria":[{"metricCode":"TotalAmount","compareType":"GreaterThanOrEqual","value":35,"operatorType":"And"}]};
+
+  const userPush = async () => {
+    const response = await fetch('https://customsearchqueryapi.azurewebsites.net/SEARCH/MetricDefinitions', {
+      method: 'POST',
+      body: request, // string or object
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+    const myJson = await response.json(); //extract JSON from the http response
+    // do something with myJson
+    console.log(response);
+  }
 
   return (
     <div className="App">
@@ -44,12 +69,12 @@ function App() {
                 </Grid.Row>
                 <Grid.Row columns='1'>
                   <Grid.Column>
-                    <Form /*onSubmit={() => onSubmit()}*/>
+                    <Form onSubmit={() => onSubmit()}>
                       <Form.Field>
                         <label>Restuarant ID</label>
                         <Dropdown 
                           selection 
-                          multiple 
+                          multiple={true}
                           placeholder='Select Restaurant ID'
                           options={restaurantOptions}
                           value={restaurantIds}
@@ -59,15 +84,27 @@ function App() {
 
                       <Form.Group> 
                         <Form.Field>
-                          <label>Date Range</label>
-                          <DateRangePicker
-                            /*startDate={this.state.startDate}
-                            startDateId='startDate'
-                            endDate={this.state.endDate}
-                            endDateId='endDate'
-                            onDatesChange={({startDate, endDate}) => {this.setState({startDate, endDate})}}
-                            focusedInput={this.state.focusedInput}
-                            onFocusChange={(focusedInput) => {this.setState({focusedInput})}}*/
+                          <label>Start Date</label>
+                          <ReactDatez
+                            name="fromDate"
+                            allowPast
+                            dateFormat='MM/DD/YYYY'
+                            placeholder='MM/DD/YYYY'
+                            firstDayOfWeek='Su'
+                            handleChange={value => {setDateInput(value)}}
+                            value={fromDate}
+                          />
+                        </Form.Field>
+                        <Form.Field>
+                          <label>End Date</label>
+                          <ReactDatez
+                            name="toDate"
+                            allowPast
+                            dateFormat='MM/DD/YYYY'
+                            placeholder='MM/DD/YYYY'
+                            firstDayOfWeek='Su'
+                            handleChange={value => {setToDateInput(value)}}
+                            value={toDate}
                           />
                         </Form.Field>                      
                       </Form.Group>
@@ -139,6 +176,14 @@ function App() {
       </Grid>
     </div>
   );
+}
+
+function onSubmit() {
+  
+}
+
+function addCriteria() {
+
 }
 
 export default App;
