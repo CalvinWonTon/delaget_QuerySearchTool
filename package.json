@@ -9,7 +9,7 @@
     "@testing-library/user-event": "^12.8.3",
     "moment": "^2.29.1",
     "react": "^16.14.0",
-    "react-dates": "^21.8.0",
+    "react-datez": "^1.4.1",
     "react-dom": "^16.14.0",
     "react-scripts": "4.0.3",
     "react-with-direction": "^1.4.0",
