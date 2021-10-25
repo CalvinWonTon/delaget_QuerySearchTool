@@ -28,8 +28,9 @@ function App() {
   const [ fromHour, setFromHour ] = useState([6]);
   const [ toHour, setToHour ] = useState([29]);
 
+  /*
   const userPull = async () => {
-    const response = await fetch('https://customsearchqueryapi.azurewebsites.net/SEARCH/MetricDefinitions');
+    const response = await fetch('https://http://localhost:3000/');
     const myJson = await response.json(); //extract JSON from the http response
     console.log(myJson);
   }
@@ -43,7 +44,7 @@ function App() {
   const request = {"restaurantIds":[1],"fromDate":"2020-09-22T00:00:00","toDate":"2020-09-22T00:00:00","fromHour":6,"toHour":29,"metricCriteria":[{"metricCode":"TotalAmount","compareType":"GreaterThanOrEqual","value":35,"operatorType":"And"}]};
 
   const userPush = async () => {
-    const response = await fetch('https://customsearchqueryapi.azurewebsites.net/SEARCH/MetricDefinitions', {
+    const response = await fetch('https://http://localhost:3000/', {
       method: 'POST',
       body: request, // string or object
       headers: {
@@ -53,7 +54,22 @@ function App() {
     const myJson = await response.json(); //extract JSON from the http response
     // do something with myJson
     console.log(response);
+  }*/
+  const handleSubmit = (e) => {
+    e.preventDefault();
+  
+    const form = {restaurantIds, fromDate, toDate, fromHour, toHour};
+    fetch('http://http://localhost:3000/', {
+      method: 'POST',
+      body: JSON.stringify(form),
+      headers: {
+        'Content-Type': 'application/json' 
+      }
+    }).then(() => {
+      console.log(form)
+    })
   }
+  
 
   return (
     <div className="App">
@@ -69,7 +85,7 @@ function App() {
                 </Grid.Row>
                 <Grid.Row columns='1'>
                   <Grid.Column>
-                    <Form onSubmit={() => onSubmit()}>
+                    <Form onSubmit={handleSubmit}>
                       <Form.Field>
                         <label>Restuarant ID</label>
                         <Dropdown 
@@ -176,10 +192,6 @@ function App() {
       </Grid>
     </div>
   );
-}
-
-function onSubmit() {
-  
 }
 
 function addCriteria() {
