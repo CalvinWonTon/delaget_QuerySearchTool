@@ -1,3 +1,7 @@
 .App{
   background-color: lightgray;
 }
+
+#container {
+  table-layout: fixed;
+}
