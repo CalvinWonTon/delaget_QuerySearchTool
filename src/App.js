@@ -8,14 +8,16 @@ import { useState, useEffect } from 'react';
 import { restaurantOptions, transactionTimeOptions, compareType, filterOptions } from './Utility'
 
 function App() {
-  const [ restaurantIds, setRestaurantIds ]= useState([]);
-  const [ fromDate, setDateInput ] = useState("");
-  const [ toDate, setToDateInput ] = useState("");
-  const [ fromHour, setFromHour ] = useState(6);
-  const [ toHour, setToHour ] = useState(29);
+  const [ restaurantIdsState, setRestaurantIds ]= useState([]);
+  const [ fromDateState, setDateInput ] = useState("");
+  const [ toDateState, setToDateInput ] = useState("");
+  const [ fromHourState, setFromHour ] = useState(6);
+  const [ toHourState, setToHour ] = useState(29);
   const [ metricCodeState, setMetricCode ] = useState("");
   const [ compareTypeState, setCompareType ] = useState("");
   const [ valueState, setValue ] = useState("");
+  const [ operatorTypeState, setOperatorType ] = useState("And")
+  const [ dataState, setData ] = useState([]);
 
   const userPull = async () => {
     const response = await fetch('https://customsearchqueryapi.azurewebsites.net/Search/MetricDefinitions');
@@ -28,40 +30,41 @@ function App() {
     console.log("Information");
 
   }, []);
-
-  //const request = {"restaurantIds":[1],"fromDate":"2020-09-22T00:00:00","toDate":"2020-09-22T00:00:00","fromHour":6,"toHour":29,"metricCriteria":[{"metricCode":"TotalAmount","compareType":"GreaterThanOrEqual","value":35,"operatorType":"And"}]};
-
-  const userPush = async (formData) => {
-    const response = await fetch('https://customsearchqueryapi.azurewebsites.net/Search/Query', {
-      method: 'POST',
-      body: JSON.stringify(formData), // string or object
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    });
-    const myJson = await response.json(); //extract JSON from the http response
-    // do something with myJson
-    console.log(myJson);
-  }
-
+  
   function onSubmit() {
     const formData = {
-      restuarantIds: restaurantIds,
-      fromDate: fromDate,
-      toDate: toDate,
-      fromHour: fromHour,
-      toHour: toHour,
+      restuarantIds: restaurantIdsState,
+      fromDate: fromDateState,
+      toDate: toDateState,
+      fromHour: fromHourState,
+      toHour: toHourState,
       metricCriteria: [{
         metricCode: metricCodeState,
         compareType: compareTypeState,
-        value: parseFloat(valueState),
-        operatorType: 'And',
+        value: Number(valueState),
+        operatorType: operatorTypeState,
       }]
     };
 
     console.log(formData);
 
-    userPush(formData);
+    const userPush = async (formData) => {
+      const response = await fetch('https://customsearchqueryapi.azurewebsites.net/Search/Query', {
+        method: 'POST',
+        body: JSON.stringify(formData), // string or object
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+      const promise = await response.json(); //extract JSON from the http response
+      return promise;
+      //console.log(promise);
+    }
+
+    userPush().then(data => {
+      console.log(data)
+      setData(data)
+    })
   }
 
   return (
@@ -100,7 +103,7 @@ function App() {
                             placeholder='MM/DD/YYYY'
                             firstDayOfWeek='Su'
                             handleChange={fromDate => {setDateInput(fromDate)}}
-                            value={fromDate}
+                            value={fromDateState}
                           />
                         </Form.Field>
                         <Form.Field>
@@ -112,7 +115,7 @@ function App() {
                             placeholder='MM/DD/YYYY'
                             firstDayOfWeek='Su'
                             handleChange={toDate => {setToDateInput(toDate)}}
-                            value={toDate}
+                            value={toDateState}
                           />
                         </Form.Field>                      
                       </Form.Group>
@@ -122,7 +125,7 @@ function App() {
                           control={Select}
                           label={'Transaction Time Start'}
                           options={transactionTimeOptions}
-                          value={fromHour}
+                          value={fromHourState}
                           placeholder='Start'
                           onChange={(event, data) => setFromHour(data.value)}
                         />
@@ -131,7 +134,7 @@ function App() {
                           label={'Transaction Time Start'}
                           options={transactionTimeOptions}
                           placeholder='End'
-                          value={toHour}
+                          value={toHourState}
                           onChange={(event, data) => setToHour(data.value)}
                         />
                       </Form.Group>
@@ -164,11 +167,11 @@ function App() {
 
                       <Form.Group>
                         <Form.Field>
-                          <Button /*onClick={() => addCriteria()}*/ color='blue'>Add Criteria</Button>
+                          <Button /*onClick={() => addCriteria()}*/ color='purple'>Add Criteria</Button>
                         </Form.Field>
                       </Form.Group>
                       <Form.Field>
-                        <Button color='olive' type='submit'>Submit</Button>
+                        <Button color='teal' type='submit'>Submit</Button>
                       </Form.Field>
                     </Form>
                   </Grid.Column>
@@ -182,28 +185,25 @@ function App() {
           <Container>
             <Segment>
               <h3>Results</h3>
-              <Table celled>
-              <Table.Header>
-                <Table.Row>
-                  <Table.HeaderCell>Restaurant ID</Table.HeaderCell>
-                  <Table.HeaderCell>BusDt</Table.HeaderCell>
-                  <Table.HeaderCell>Order Time</Table.HeaderCell>
-                  <Table.HeaderCell>Ticket Nunmber</Table.HeaderCell>
-                  <Table.HeaderCell>Net Amount</Table.HeaderCell>
-                  <Table.HeaderCell>Total Amount</Table.HeaderCell>
-                  <Table.HeaderCell>Items Sold</Table.HeaderCell>
-                  <Table.HeaderCell>Beverage Quantity</Table.HeaderCell>
-                  <Table.HeaderCell>Discount Amount</Table.HeaderCell>
-                  <Table.HeaderCell>Discount Ratio</Table.HeaderCell>
-                  <Table.HeaderCell>Deleted Items</Table.HeaderCell>
-                  <Table.HeaderCell>Refund Amount</Table.HeaderCell>
-                </Table.Row>
-              </Table.Header>   
-
-               <Table.Body>
-
-               </Table.Body>
-            </Table>
+                <Table celled>
+                  <Table.Header>
+                    <Table.Row>
+                      <Table.HeaderCell>Restaurant ID</Table.HeaderCell>
+                      <Table.HeaderCell>BusDt</Table.HeaderCell>
+                      <Table.HeaderCell>Order Time</Table.HeaderCell>
+                      <Table.HeaderCell>Ticket Nunmber</Table.HeaderCell>
+                      <Table.HeaderCell>Net Amount</Table.HeaderCell>
+                      <Table.HeaderCell>Total Amount</Table.HeaderCell>
+                      <Table.HeaderCell>Items Sold</Table.HeaderCell>
+                      <Table.HeaderCell>Beverage Quantity</Table.HeaderCell>
+                      <Table.HeaderCell>Discount Amount</Table.HeaderCell>
+                      <Table.HeaderCell>Discount Ratio</Table.HeaderCell>
+                      <Table.HeaderCell>Deleted Items</Table.HeaderCell>
+                      <Table.HeaderCell>Refund Amount</Table.HeaderCell>
+                    </Table.Row>
+                  </Table.Header>   
+                  
+                </Table>
             </Segment>
 
 
