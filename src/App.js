@@ -5,7 +5,7 @@ import 'react-datez/dist/css/react-datez.css';
 import { ReactDatez } from 'react-datez'
 import { Container, Dropdown, Form, Grid, Segment, Select, Button, Divider, Input, Table } from 'semantic-ui-react';
 import { useState, useEffect } from 'react';
-import { restaurantOptions, transactionTimeOptions, compareType, filterOptions } from './Utility'
+import { restaurantOptions, transactionTimeOptions, compareType, filterOptions, operatorTypeOptions, companyData } from './Utility'
 
 function App() {
   const [ restaurantIdsState, setRestaurantIds ]= useState([]);
@@ -17,23 +17,28 @@ function App() {
   const [ compareTypeState, setCompareType ] = useState("");
   const [ valueState, setValue ] = useState("");
   const [ operatorTypeState, setOperatorType ] = useState("And")
-  const [ dataState, setData ] = useState([]);
+  
+  const [ metrics, setMetrics ] = useState([])
+  const [ resultData, setResultData ] = useState([]);
 
-  const userPull = async () => {
-    const response = await fetch('https://customsearchqueryapi.azurewebsites.net/Search/MetricDefinitions');
-    const myJson = await response.json(); //extract JSON from the http response
-    console.log(myJson);
-  }
 
-  useEffect(() => {
-    userPull();
-    console.log("Information");
+  /*function addCrieria() {
+    const metricCriteriaNew = [];
+    for (var i = 0; i < metricCriteriaTest.length; i++) {
+      metricCriteriaNew[i] = metricCriteriaTest[i];
+    } 
 
-  }, []);
+    metricCriteriaTest.push({
+      metricCode: "",
+      compareType: "",
+      value: "",
+      operatorType: "And"
+    });
+  }*/
   
   function onSubmit() {
     const formData = {
-      restuarantIds: restaurantIdsState,
+      restaurantIds: restaurantIdsState,
       fromDate: fromDateState,
       toDate: toDateState,
       fromHour: fromHourState,
@@ -56,16 +61,29 @@ function App() {
           'Content-Type': 'application/json'
         }
       });
-      const promise = await response.json(); //extract JSON from the http response
-      return promise;
-      //console.log(promise);
+      return response.json();
     }
 
-    userPush().then(data => {
+    userPush(formData).then(data => {
       console.log(data)
-      setData(data)
+      setResultData(data)
     })
   }
+
+  useEffect(() => {
+    const url = "https://customsearchqueryapi.azurewebsites.net/Search/MetricDefinitions";
+        const fetchData = async () => {
+            try {
+                const response = await fetch(url);
+                const myJson = await response.json();
+                console.log(myJson)
+                setMetrics(myJson)
+            } catch (error) {
+                console.log("ERROR", error);
+            }
+        };
+        fetchData();
+  }, []);
 
   return (
     <div className="App">
@@ -139,6 +157,43 @@ function App() {
                         />
                       </Form.Group>
 
+                      {/* {metricCriteriaTest.map((criteria, index) => {
+                        return(
+                          <Form.Group>
+                        <Form.Field
+                          control={Select}
+                          label='Metric'
+                          options={filterOptions}
+                          placeholder='Select Metric'
+                          value={metricCodeState}
+                          onChange={(event, data) => setMetricCode(data.value)}
+                        />
+                        <Form.Field
+                          control={Select}
+                          options={compareType}
+                          label='Comparator'
+                          placeholder='Select Comparator'
+                          value={compareTypeState}
+                          onChange={(event, data) => setCompareType(data.value)}
+                        />
+                        <Form.Field
+                          control={Input}
+                          label='Value'
+                          placeholder='e.g. 12345'
+                          value={valueState}
+                          onChange={(event, data) => setValue(data.value)}
+                        />
+                        <Form.Field
+                          control={Select}
+                          label={"Operator Type"}
+                          options={operatorTypeOptions}
+                          placeholder={"Type"}
+                          onChange={(event, data) => setOperatorType(data.value)}
+                        />
+                      </Form.Group>
+                        )
+                      })} */}
+                      
                       <Form.Group>
                         <Form.Field
                           control={Select}
@@ -163,16 +218,25 @@ function App() {
                           value={valueState}
                           onChange={(event, data) => setValue(data.value)}
                         />
+                        <Form.Field
+                          control={Select}
+                          label={"Operator Type"}
+                          options={operatorTypeOptions}
+                          placeholder={"Type"}
+                          onChange={(event, data) => setOperatorType(data.value)}
+                        />
                       </Form.Group>
 
                       <Form.Group>
                         <Form.Field>
-                          <Button /*onClick={() => addCriteria()}*/ color='purple'>Add Criteria</Button>
+                          <Button /*type="button onClick={() => addCriteria()}*/ color='violet'>Add Criteria</Button>
                         </Form.Field>
                       </Form.Group>
+
                       <Form.Field>
                         <Button color='teal' type='submit'>Submit</Button>
                       </Form.Field>
+                    
                     </Form>
                   </Grid.Column>
                 </Grid.Row>
@@ -185,24 +249,48 @@ function App() {
           <Container>
             <Segment>
               <h3>Results</h3>
-                <Table celled>
+                <Table celled>   
                   <Table.Header>
                     <Table.Row>
-                      <Table.HeaderCell>Restaurant ID</Table.HeaderCell>
-                      <Table.HeaderCell>BusDt</Table.HeaderCell>
-                      <Table.HeaderCell>Order Time</Table.HeaderCell>
-                      <Table.HeaderCell>Ticket Nunmber</Table.HeaderCell>
-                      <Table.HeaderCell>Net Amount</Table.HeaderCell>
-                      <Table.HeaderCell>Total Amount</Table.HeaderCell>
-                      <Table.HeaderCell>Items Sold</Table.HeaderCell>
-                      <Table.HeaderCell>Beverage Quantity</Table.HeaderCell>
-                      <Table.HeaderCell>Discount Amount</Table.HeaderCell>
-                      <Table.HeaderCell>Discount Ratio</Table.HeaderCell>
-                      <Table.HeaderCell>Deleted Items</Table.HeaderCell>
-                      <Table.HeaderCell>Refund Amount</Table.HeaderCell>
+                        <Table.HeaderCell>Restaurant ID</Table.HeaderCell>
+                        <Table.HeaderCell>Transaction Date</Table.HeaderCell>
+                        <Table.HeaderCell>Order Number</Table.HeaderCell>
+                        <Table.HeaderCell>Order Time</Table.HeaderCell>
+                        {metrics.map((m, index) => { return <Table.HeaderCell key={index}>{m.metricCodeState}</Table.HeaderCell> })}
                     </Table.Row>
-                  </Table.Header>   
-                  
+                  </Table.Header>
+
+                  {resultData &&
+                    <Table.Body>
+                      {resultData.map((data, index) => {
+                        return(
+                          <Table.Row key={index}>
+                            <Table.Cell>
+                              {data["restaurantId"]}
+                            </Table.Cell>
+                            <Table.Cell>
+                              {data["busDt"]}
+                            </Table.Cell>
+                            <Table.Cell>
+                              {data["orderNumber"]}
+                            </Table.Cell>
+                            <Table.Cell>
+                              {data["orderTime"]}
+                            </Table.Cell>
+
+                            {/* {metrics.map((m, index2) => {
+                            const fieldName = m.metricCodeState[0].toLowerCase() + m.metricCodeState.substring(1);
+                            return(
+                              <Table.Cell key={index2}>
+                                {data[fieldName]}
+                              </Table.Cell>
+                            )
+                          })} */}
+                          </Table.Row>
+                        )
+                      })}
+                    </Table.Body>
+                  }
                 </Table>
             </Segment>
 
@@ -214,9 +302,5 @@ function App() {
     </div>
   );
 }
-
-/*function addCriteria() {
-
-}*/
 
 export default App;
