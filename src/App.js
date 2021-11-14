@@ -3,9 +3,16 @@ import './App.css';
 import 'semantic-ui-css/semantic.min.css';
 import 'react-datez/dist/css/react-datez.css';
 import { ReactDatez } from 'react-datez'
-import { Container, Dropdown, Form, Grid, Segment, Select, Button, Divider, Input, Table } from 'semantic-ui-react';
+import { Container, Dropdown, Form, Grid, Segment, Select, Button, Divider, Input, Table, Pagination, Icon } from 'semantic-ui-react';
 import { useState, useEffect } from 'react';
-import { restaurantOptions, transactionTimeOptions, compareType, filterOptions, operatorTypeOptions, companyData } from './Utility'
+import { restaurantOptions, transactionTimeOptions, compareType, filterOptions, operatorTypeOptions, formatValues } from './Utility'
+
+const initialMetricCriteria = [{
+  metricCode: "",
+  compareType: "",
+  value: "",
+  operatorType: "And",
+}]
 
 function App() {
   const [ restaurantIdsState, setRestaurantIds ]= useState([]);
@@ -13,28 +20,58 @@ function App() {
   const [ toDateState, setToDateInput ] = useState("");
   const [ fromHourState, setFromHour ] = useState(6);
   const [ toHourState, setToHour ] = useState(29);
-  const [ metricCodeState, setMetricCode ] = useState("");
-  const [ compareTypeState, setCompareType ] = useState("");
-  const [ valueState, setValue ] = useState("");
-  const [ operatorTypeState, setOperatorType ] = useState("And")
   
-  const [ metrics, setMetrics ] = useState([])
+  const [ metrics, setMetrics ] = useState([]);
   const [ resultData, setResultData ] = useState([]);
+  const [ metricCriteriaState, setMetricCriteria ] = useState(initialMetricCriteria);
+  const [ activePageState, setActivePage ] = useState(1);
+  const itemsPerPage = 10;
 
-
-  /*function addCrieria() {
+  function addCriteria() {
     const metricCriteriaNew = [];
-    for (var i = 0; i < metricCriteriaTest.length; i++) {
-      metricCriteriaNew[i] = metricCriteriaTest[i];
+    for (var i = 0; i < metricCriteriaState.length; i++) {
+      metricCriteriaNew[i] = metricCriteriaState[i];
     } 
 
-    metricCriteriaTest.push({
+    metricCriteriaNew.push({
       metricCode: "",
       compareType: "",
       value: "",
       operatorType: "And"
     });
-  }*/
+
+    setMetricCriteria(metricCriteriaNew);
+  } 
+
+  function removeCriteria(index) {
+    const metricCriteriaNew = [];
+    for (var i = 0; i < metricCriteriaState.length; i++) {
+      metricCriteriaNew[i] = metricCriteriaState[i];
+    } 
+
+    metricCriteriaNew.splice(index, 1);
+    setMetricCriteria(metricCriteriaNew);
+  }
+
+  function changeMetricCriteria(index, propertyName, data) {
+    const metricCriteriaNew = []
+    for(var i = 0; i < metricCriteriaState.length; i++) {
+      metricCriteriaNew[i] = metricCriteriaState[i]
+    }
+
+    if(propertyName === "value") {
+      metricCriteriaNew[index][propertyName] = Number(data.value);
+    }else{
+      metricCriteriaNew[index][propertyName] = data.value;
+    }
+
+    setMetricCriteria(metricCriteriaNew)
+  }
+
+  function changePage(data){
+    setActivePage(data.activePageState)
+  }
+  const slicedResultsData = resultData.splice((activePageState - 1) * itemsPerPage, activePageState * itemsPerPage)
   
   function onSubmit() {
     const formData = {
@@ -43,12 +80,7 @@ function App() {
       toDate: toDateState,
       fromHour: fromHourState,
       toHour: toHourState,
-      metricCriteria: [{
-        metricCode: metricCodeState,
-        compareType: compareTypeState,
-        value: Number(valueState),
-        operatorType: operatorTypeState,
-      }]
+      metricCriteria: metricCriteriaState
     };
 
     console.log(formData);
@@ -157,79 +189,49 @@ function App() {
                         />
                       </Form.Group>
 
-                      {/* {metricCriteriaTest.map((criteria, index) => {
+                      {metricCriteriaState.map((criteria, index) => {
                         return(
-                          <Form.Group>
-                        <Form.Field
-                          control={Select}
-                          label='Metric'
-                          options={filterOptions}
-                          placeholder='Select Metric'
-                          value={metricCodeState}
-                          onChange={(event, data) => setMetricCode(data.value)}
-                        />
-                        <Form.Field
-                          control={Select}
-                          options={compareType}
-                          label='Comparator'
-                          placeholder='Select Comparator'
-                          value={compareTypeState}
-                          onChange={(event, data) => setCompareType(data.value)}
-                        />
-                        <Form.Field
-                          control={Input}
-                          label='Value'
-                          placeholder='e.g. 12345'
-                          value={valueState}
-                          onChange={(event, data) => setValue(data.value)}
-                        />
-                        <Form.Field
-                          control={Select}
-                          label={"Operator Type"}
-                          options={operatorTypeOptions}
-                          placeholder={"Type"}
-                          onChange={(event, data) => setOperatorType(data.value)}
-                        />
-                      </Form.Group>
+                          <Form.Group key={index}>
+                            <Form.Field
+                              control={Select}
+                              label='Metric'
+                              options={filterOptions}
+                              placeholder='Select Metric'
+                              value={metricCriteriaState[index].metricCode}
+                              onChange={(event, data) => changeMetricCriteria(index, 'metricCode', data)}
+                            />
+                            <Form.Field
+                              control={Select}
+                              options={compareType}
+                              label='Comparator'
+                              placeholder='Select Comparator'
+                              value={metricCriteriaState[index].compareType}
+                              onChange={(event, data) => changeMetricCriteria(index, 'compareType', data)}
+                            />
+                            <Form.Field
+                              control={Input}
+                              label='Value'
+                              placeholder='e.g. 12345'
+                              value={metricCriteriaState[index].value}
+                              onChange={(event, data) => changeMetricCriteria(index, 'value', data)}
+                            />
+                            <Form.Field
+                              control={Select}
+                              label={"Operator Type"}
+                              options={operatorTypeOptions}
+                              placeholder={"Type"}
+                              value={metricCriteriaState[index].operatorType}
+                              onChange={(event, data) => changeMetricCriteria(index, 'operatorType', data)}
+                              disabled={index === 0 ? true : false}
+                            />
+                          </Form.Group>
                         )
-                      })} */}
-                      
-                      <Form.Group>
-                        <Form.Field
-                          control={Select}
-                          label='Metric'
-                          options={filterOptions}
-                          placeholder='Select Metric'
-                          value={metricCodeState}
-                          onChange={(event, data) => setMetricCode(data.value)}
-                        />
-                        <Form.Field
-                          control={Select}
-                          options={compareType}
-                          label='Comparator'
-                          placeholder='Select Comparator'
-                          value={compareTypeState}
-                          onChange={(event, data) => setCompareType(data.value)}
-                        />
-                        <Form.Field
-                          control={Input}
-                          label='Value'
-                          placeholder='e.g. 12345'
-                          value={valueState}
-                          onChange={(event, data) => setValue(data.value)}
-                        />
-                        <Form.Field
-                          control={Select}
-                          label={"Operator Type"}
-                          options={operatorTypeOptions}
-                          placeholder={"Type"}
-                          onChange={(event, data) => setOperatorType(data.value)}
-                        />
-                      </Form.Group>
+                      })}
+
 
                       <Form.Group>
                         <Form.Field>
-                          <Button /*type="button onClick={() => addCriteria()}*/ color='violet'>Add Criteria</Button>
+                          <Button type='button' onClick={() => addCriteria()} color='violet'>Add Criteria</Button>
                         </Form.Field>
                       </Form.Group>
 
@@ -248,44 +250,70 @@ function App() {
         <Grid.Row>
           <Container>
             <Segment>
-              <h3>Results</h3>
+              <Grid>
+                <Grid.Row>
+                  <Grid.Column>
+                    <h2>Results</h2>
+                  </Grid.Column>
+                  <Grid.Column>
+                    {resultData.length >= itemsPerPage &&
+                      <Pagination
+                        className={'Page'}
+                        size='small'
+                        activePage={activePageState}
+                        onPageChange={(event, data) => changePage(data)}
+                        totalPages={Math.ceil(resultData.length / itemsPerPage)}
+
+                        ellipsisItem={{
+                          content: <Icon name='ellipsis horizontal'/>,
+                          icon: true
+                        }}
+                        firstItem={null}
+                        lastItem={null}
+                        prevItem={null}
+                        nextItem={null}
+                      />
+                    }
+                  </Grid.Column>
+                </Grid.Row>
+              </Grid>
                 <Table celled>   
                   <Table.Header>
                     <Table.Row>
                         <Table.HeaderCell>Restaurant ID</Table.HeaderCell>
                         <Table.HeaderCell>Transaction Date</Table.HeaderCell>
-                        <Table.HeaderCell>Order Number</Table.HeaderCell>
-                        <Table.HeaderCell>Order Time</Table.HeaderCell>
-                        {metrics.map((m, index) => { return <Table.HeaderCell key={index}>{m.metricCodeState}</Table.HeaderCell> })}
+                        <Table.HeaderCell>Transaction Time</Table.HeaderCell>
+                        <Table.HeaderCell>Ticket Number</Table.HeaderCell>
+                        {metrics.map((m, index) => { return <Table.HeaderCell key={index}>{m.alias}</Table.HeaderCell> })}
                     </Table.Row>
                   </Table.Header>
 
                   {resultData &&
                     <Table.Body>
-                      {resultData.map((data, index) => {
+                      {slicedResultsData.map((data, index) => {
                         return(
                           <Table.Row key={index}>
                             <Table.Cell>
                               {data["restaurantId"]}
                             </Table.Cell>
                             <Table.Cell>
-                              {data["busDt"]}
+                              {formatValues(data["busDt"], "Date", 0)}
+                            </Table.Cell>
+                            <Table.Cell>
+                              {formatValues(data["orderTime"], "Time", 0)}
                             </Table.Cell>
                             <Table.Cell>
                               {data["orderNumber"]}
                             </Table.Cell>
-                            <Table.Cell>
-                              {data["orderTime"]}
-                            </Table.Cell>
 
-                            {/* {metrics.map((m, index2) => {
-                            const fieldName = m.metricCodeState[0].toLowerCase() + m.metricCodeState.substring(1);
+                            {metrics.map((m, index2) => {
+                            const fieldName = m.metricCode[0].toLowerCase() + m.metricCode.substring(1);
                             return(
                               <Table.Cell key={index2}>
-                                {data[fieldName]}
+                                {formatValues(data[fieldName], m.dataType, m.decimalPlaces)}
                               </Table.Cell>
                             )
-                          })} */}
+                            })}
                           </Table.Row>
                         )
                       })}
