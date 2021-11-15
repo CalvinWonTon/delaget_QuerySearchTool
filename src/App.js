@@ -69,9 +69,9 @@ function App() {
   }
 
   function changePage(data){
-    setActivePage(data.activePageState)
+    setActivePage(data.activePage)
   }
-  const slicedResultsData = resultData.splice((activePageState - 1) * itemsPerPage, activePageState * itemsPerPage)
+  const slicedResultsData = resultData.slice((activePageState - 1) * itemsPerPage, activePageState * itemsPerPage)
   
   function onSubmit() {
     const formData = {
@@ -192,6 +192,13 @@ function App() {
                       {metricCriteriaState.map((criteria, index) => {
                         return(
                           <Form.Group key={index}>
+                            {metricCriteriaState.length > 1 &&
+                              <Form.Field>
+                                <div>
+                                  <Icon name='close' onClick={() => removeCriteria(index)}/>
+                                </div>
+                              </Form.Field>
+                            }
                             <Form.Field
                               control={Select}
                               label='Metric'
@@ -253,7 +260,7 @@ function App() {
               <Grid>
                 <Grid.Row>
                   <Grid.Column>
-                    <h2>Results</h2>
+                    <h3>Results</h3>
                   </Grid.Column>
                   <Grid.Column>
                     {resultData.length >= itemsPerPage &&
